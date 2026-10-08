@@ -1,0 +1,17 @@
+(executable
+ (name sqlite_smoke)
+ (modules sqlite_smoke)
+ (modes exe byte_complete)
+ (libraries sqlite3))
+
+(executable
+ (name ssl_smoke)
+ (modules ssl_smoke)
+ (modes exe byte_complete)
+ (libraries ssl unix threads))
+
+(executable
+ (name eio_smoke)
+ (modules eio_smoke)
+ (modes exe byte_complete)
+ (libraries eio_main))

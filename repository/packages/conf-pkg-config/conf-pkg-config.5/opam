@@ -1,0 +1,15 @@
+opam-version: "2.0"
+synopsis: "Project-local native ARM64 pkg-config"
+maintainer: "Windows ARM64 port project"
+authors: ["pkgconf contributors"]
+license: "ISC"
+homepage: "https://github.com/pkgconf/pkgconf"
+bug-reports: "https://github.com/pkgconf/pkgconf/issues"
+flags: conf
+available: os = "win32" & arch = "arm64"
+# The compiler uses static linking; include pkg-config's private dependencies.
+setenv: [[PKG_CONFIG_ARGN = "--static"]]
+build: [
+  ["pkg-config" "--version"]
+  ["sh" "-c" "echo 'opam-version: \"2.0\"' > conf-pkg-config.config; echo 'variables { command: [\"pkg-config\"] }' >> conf-pkg-config.config"]
+]

@@ -1,0 +1,5 @@
+b1770b92c5f8381c8052437decafbf52701d9c8e7e610998fecfae6adee663cd *dist/ocaml-5.5.1-arm64-windows-bin.tar.gz
+f4279945b6ad1c9df354bb066e4ba17b4aacad015e2792b30ba1912de234100c *dist/ocaml-5.5.1-windows-arm64-src.tar.gz
+da2391351bb0246378856181b708069b17a8f4a9c36013344874b67838553bae *dist/opam-2.6.1-arm64-windows-bin.tar.gz
+2e59fd19cd218902680445b3b1ffe429d4dfa8c13543abb2ee98c209e7f07cde *dist/opam-2.6.1-windows-arm64-src.tar.gz
+d6bab6c4a7081a980d3d164dea6e596bd1f70aed442b73524ad54b95a441027b *dist/windows-arm64-repository.tar.gz

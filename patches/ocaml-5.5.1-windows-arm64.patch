@@ -1,0 +1,296 @@
+diff --git a/aclocal.m4 b/aclocal.m4
+index 9b95b09..c373090 100644
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -644,7 +644,7 @@ AC_DEFUN([OCAML_CHECK_WINDOWS_TRIPLET], [
+     [i686-*-cygwin|x86_64-*-cygwin],[],
+     [*-*-cygwin*],
+       [AC_MSG_ERROR([unknown Cygwin variant])],
+-    [i686-w64-mingw32*|x86_64-w64-mingw32*],[],
++    [i686-w64-mingw32*|x86_64-w64-mingw32*|aarch64-w64-mingw32*],[],
+     [*-*-mingw*],
+       [AC_MSG_ERROR([unknown mingw-w64 variant])],
+     [i686-pc-windows|x86_64-pc-windows],[],
+diff --git a/asmcomp/arm64/emit.mlp b/asmcomp/arm64/emit.mlp
+index 5427b30..ffeb4da 100644
+--- a/asmcomp/arm64/emit.mlp
++++ b/asmcomp/arm64/emit.mlp
+@@ -318,6 +318,8 @@ let emit_literals env =
+   if env.float_literals <> [] then begin
+     if macosx then
+       `	.section	__TEXT,__literal8,8byte_literals\n`
++    else if Config.system = "mingwarm64" then
++      `	.section	.rdata\n`
+     else
+       `	.section	.rodata\n`;
+     `	.align	3\n`;
+@@ -334,7 +336,7 @@ let emit_load_symbol_addr dst s =
+   if macosx then begin
+     `	adrp	{emit_reg dst}, {emit_symbol s}@GOTPAGE\n`;
+     `	ldr	{emit_reg dst}, [{emit_reg dst}, {emit_symbol s}@GOTPAGEOFF]\n`
+-  end else if not !Clflags.dlcode then begin
++  end else if Config.system = "mingwarm64" || not !Clflags.dlcode then begin
+     `	adrp	{emit_reg dst}, {emit_symbol s}\n`;
+     `	add	{emit_reg dst}, {emit_reg dst}, #:lo12:{emit_symbol s}\n`
+   end else begin
+diff --git a/configure.ac b/configure.ac
+index 167629f..7123ff9 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1126,6 +1126,11 @@ AS_CASE([$ocaml_cc_vendor],
+     common_cflags="-O2 -fno-strict-aliasing -fwrapv -mms-bitfields"
+     internal_cppflags='-D__USE_MINGW_ANSI_STDIO=0 -DUNICODE -D_UNICODE'
+     internal_cppflags="$internal_cppflags -DWINDOWS_UNICODE=$windows_unicode"],
++  [mingw-*-*-clang-*],
++    [common_cflags="-O2 -fno-strict-aliasing -fwrapv"
++    internal_cflags="$cc_warnings -fno-common"
++    internal_cppflags='-D__USE_MINGW_ANSI_STDIO=0 -DUNICODE -D_UNICODE'
++    internal_cppflags="$internal_cppflags -DWINDOWS_UNICODE=$windows_unicode"],
+   [mingw-*],
+     [AC_MSG_ERROR([Unsupported C compiler for a MinGW-w64 build])],
+   [msvc-0*|msvc-1[[0-8]]*|msvc-19[[012]]*|msvc-193[[0-7]]],
+@@ -1183,6 +1188,7 @@ AS_CASE([$target],
+ AS_IF([test x"$enable_shared" = "xno"],
+   [supports_shared_libraries=false
+   AS_CASE([$target],
++    [aarch64-w64-mingw32*], [],
+     [*-pc-windows|*-w64-mingw32*],
+     [AC_MSG_ERROR([Cannot build native Win32 with --disable-shared])])],
+   [supports_shared_libraries=true])
+@@ -1291,14 +1297,14 @@ AS_CASE([$have_flexdll_h,$supports_shared_libraries,$target],
+  [no,true,*-*-cygwin],
+    [supports_shared_libraries=false
+    AC_MSG_WARN([flexdll.h not found: shared library support disabled.])],
+- [no,*,*-w64-mingw32*|no,*,*-pc-windows],
++ [no,true,*-w64-mingw32*|no,true,*-pc-windows],
+    [AC_MSG_ERROR([flexdll.h is required for native Win32])])
+ 
+ AS_CASE([$flexdll_source_dir,$supports_shared_libraries,$flexlink,$target],
+   [,true,,*-*-cygwin],
+     [supports_shared_libraries=false
+     AC_MSG_WARN([flexlink not found: shared library support disabled.])],
+-  [,*,,*-w64-mingw32*|,*,,*-pc-windows],
++  [,true,,*-w64-mingw32*|,true,,*-pc-windows],
+     [AC_MSG_ERROR([flexlink is required for native Win32])])
+ 
+ mkexe_cmd_exp="$CC"
+@@ -1319,6 +1325,13 @@ AS_CASE([$ocaml_cc_vendor,$target],
+       oc_ldflags='-Wl,--stack,16777216']
+     )
+     ostype="Cygwin"],
++  [*,aarch64-w64-mingw32*],
++    [ostype="Win32"
++    toolchain="mingw"
++    oc_exe_ldflags='-municode'
++    oc_ldflags='-Wl,--stack,33554432'
++    mkexe_extra_flags="$oc_exe_ldflags"
++    SO="dll"],
+   [*,*-w64-mingw32*],
+     [AS_CASE([$target],
+       [i686-*-*], [oc_dll_ldflags="-static-libgcc"])
+@@ -1719,6 +1732,8 @@ AS_CASE([$target],
+     [has_native_backend=yes; arch=amd64; system=macosx],
+   [x86_64-w64-mingw32*],
+     [has_native_backend=yes; arch=amd64; system=mingw64],
++  [aarch64-w64-mingw32*],
++    [has_native_backend=yes; arch=arm64; system=mingwarm64],
+   [aarch64-*-linux*],
+     [AS_IF([$arch64],
+        [has_native_backend=yes; arch=arm64; system=linux],
+diff --git a/otherlibs/unix/sockopt_win32.c b/otherlibs/unix/sockopt_win32.c
+index 6b8adff..77d8453 100644
+--- a/otherlibs/unix/sockopt_win32.c
++++ b/otherlibs/unix/sockopt_win32.c
+@@ -108,7 +108,7 @@ static const char * setsockopt_fun_name[] = {
+ union option_value {
+   int i;
+   struct linger lg;
+-  struct timeval tv;
++  DWORD milliseconds;
+ };
+ 
+ CAMLexport value caml_unix_getsockopt_aux(const char * name,
+@@ -129,7 +129,7 @@ CAMLexport value caml_unix_getsockopt_aux(const char * name,
+   case TYPE_LINGER:
+     optsize = sizeof(optval.lg); break;
+   case TYPE_TIMEVAL:
+-    optsize = sizeof(optval.tv); break;
++    optsize = sizeof(optval.milliseconds); break;
+   default:
+     caml_unix_error(EINVAL, name, Nothing);
+   }
+@@ -152,8 +152,7 @@ CAMLexport value caml_unix_getsockopt_aux(const char * name,
+     }
+     break;
+   case TYPE_TIMEVAL:
+-    res = caml_copy_double((double) optval.tv.tv_sec
+-                           + (double) optval.tv.tv_usec / USEC_PER_SEC);
++    res = caml_copy_double((double) optval.milliseconds / 1000.0);
+     break;
+   case TYPE_UNIX_ERROR:
+     if (optval.i == 0) {
+@@ -188,10 +187,17 @@ CAMLexport value caml_unix_setsockopt_aux(const char * name,
+     if (optval.lg.l_onoff)
+       optval.lg.l_linger = Int_val(Some_val(val));
+     break;
+-  case TYPE_TIMEVAL:
+-    optval.tv = caml_timeval_of_sec(Double_val(val));
+-    optsize = sizeof(optval.tv);
++  case TYPE_TIMEVAL: {
++    /* Winsock uses a DWORD in milliseconds, not a POSIX timeval. */
++    double ms = Double_val(val) * 1000.0;
++    if (!(ms >= 0.0 && ms <= (double) MAXDWORD))
++      caml_unix_error(EINVAL, name, Nothing);
++    optval.milliseconds = (DWORD) ms;
++    /* Round positive fractional milliseconds up; zero means no timeout. */
++    if ((double) optval.milliseconds < ms) optval.milliseconds++;
++    optsize = sizeof(optval.milliseconds);
+     break;
++  }
+   case TYPE_UNIX_ERROR:
+   default:
+     caml_unix_error(EINVAL, name, Nothing);
+diff --git a/runtime/arm64.S b/runtime/arm64.S
+index 3e08f14..3b9096f 100644
+--- a/runtime/arm64.S
++++ b/runtime/arm64.S
+@@ -87,7 +87,7 @@
+         adrp        TMP2, G(\symb)@GOTPAGE
+         ldr         \reg, [TMP2, G(\symb)@GOTPAGEOFF]
+         .endm
+-#elif defined(__PIC__)
++#elif defined(__PIC__) && !defined(SYS_mingwarm64)
+ #define ADDRGLOBAL(reg,symb) \
+         adrp    TMP2, :got:G(symb); \
+         ldr     reg, [TMP2, #:got_lo12:G(symb)]
+diff --git a/runtime/caml/fail.h b/runtime/caml/fail.h
+index a9dcb82..febb02c 100644
+--- a/runtime/caml/fail.h
++++ b/runtime/caml/fail.h
+@@ -46,7 +46,8 @@
+ struct longjmp_buffer {
+   sigjmp_buf buf;
+ };
+-#elif defined(__MINGW64__) && defined(__GNUC__) && __GNUC__ >= 4
++#elif defined(__MINGW64__) && defined(__GNUC__) && __GNUC__ >= 4 \
++   && !defined(__aarch64__)
+ /* MPR#7638: issues with setjmp/longjmp in Mingw64, use GCC builtins instead */
+ struct longjmp_buffer {
+   intptr_t buf[5];
+diff --git a/runtime/win32.c b/runtime/win32.c
+index 16e257e..2ec1640 100644
+--- a/runtime/win32.c
++++ b/runtime/win32.c
+@@ -567,6 +567,27 @@ static LONG CALLBACK
+   return EXCEPTION_CONTINUE_SEARCH;
+ }
+ 
++#elif defined(__aarch64__)
++
++static LONG CALLBACK
++    caml_stack_overflow_VEH (EXCEPTION_POINTERS* exn_info)
++{
++  DWORD code = exn_info->ExceptionRecord->ExceptionCode;
++  CONTEXT *ctx = exn_info->ContextRecord;
++
++  if (code == EXCEPTION_STACK_OVERFLOW &&
++      caml_find_code_fragment_by_pc((char *) ctx->Pc) != NULL) {
++    uintnat *alt_sp = win32_alt_stack +
++      sizeof(win32_alt_stack) / sizeof(uintnat);
++    Caml_state->young_ptr = (value *) ctx->X27;
++    ctx->X0 = exn_info->ExceptionRecord->ExceptionInformation[1];
++    ctx->Sp = (uintnat) alt_sp & ~(uintnat) 15;
++    ctx->Pc = (uintnat) &caml_reset_stack;
++    return EXCEPTION_CONTINUE_EXECUTION;
++  }
++  return EXCEPTION_CONTINUE_SEARCH;
++}
++
+ #else
+ 
+ static LONG CALLBACK
+diff --git a/stdlib/Makefile b/stdlib/Makefile
+index 0e3d769..83b4660 100644
+--- a/stdlib/Makefile
++++ b/stdlib/Makefile
+@@ -95,7 +95,7 @@ runtime-launch-info: tmpheader.exe
+ ifeq "$(TOOLCHAIN)" "mingw"
+ # mingw-w64: optimise header.o for space and remove all unused sections during
+ # linking.
+-header.o: OC_CFLAGS += -Os
++header.o: OC_CFLAGS += -Os -ffreestanding
+ ifeq "$(SYSTEM)" "mingw"
+   ENTRYPOINT = _wmainCRTStartup
+ else
+diff --git a/tools/ocamlmklib.ml b/tools/ocamlmklib.ml
+index a2e7c9f..d21dbb4 100644
+--- a/tools/ocamlmklib.ml
++++ b/tools/ocamlmklib.ml
+@@ -320,7 +320,7 @@ let build_libs () =
+   end;
+   if !bytecode_objs <> [] then
+     scommand
+-      (sprintf "%s -a %s %s %s -o %s.cma %s %s -dllib%s -l%s -cclib -l%s \
++      (sprintf "%s -a %s %s %s -o %s.cma %s %s %s -cclib -l%s \
+                    %s %s %s %s"
+                   (transl_path !ocamlc)
+                   (if !debug then "-g" else "")
+@@ -329,8 +329,10 @@ let build_libs () =
+                   !output
+                   (String.concat " " !caml_opts)
+                   (String.concat " " !bytecode_objs)
+-                  (if !suffixed then "-suffixed" else "")
+-                  (Filename.basename !output_c)
++                  (if Config.system = "mingwarm64" && not !dynlink then ""
++                   else sprintf "-dllib%s -l%s"
++                     (if !suffixed then "-suffixed" else "")
++                     (Filename.basename !output_c))
+                   (Filename.basename !output_c)
+                   (String.concat " " (prefix_list "-ccopt " !c_opts))
+                   (make_rpath_ccopt Config.default_rpath)
+diff --git a/utils/ccomp.ml b/utils/ccomp.ml
+index d6818ef..c503029 100644
+--- a/utils/ccomp.ml
++++ b/utils/ccomp.ml
+@@ -46,6 +46,13 @@ let build_response_file lst =
+   "@" ^ responsefile
+ 
+ let quote_files ~response_files lst =
++  (* LLVM's GNU-style response files treat backslashes as escapes, unlike
++     flexlink's Windows-style parser. Forward slashes also work on Windows. *)
++  let lst =
++    if Config.system = "mingwarm64" then
++      List.map (String.map (function '\\' -> '/' | c -> c)) lst
++    else lst
++  in
+   let lst = List.filter (fun f -> f <> "") lst in
+   let quoted = List.map Filename.quote lst in
+   let s = String.concat " " quoted in
+@@ -148,8 +155,10 @@ let create_archive archive file_list =
+                                (quote_files ~response_files:true file_list))
+     | _ ->
+         assert(String.length Config.ar > 0);
+-        command(Printf.sprintf "%s rc %s %s"
+-                Config.ar quoted_archive
++        command(Printf.sprintf "%s %s %s %s"
++                Config.ar
++                (if Config.system = "mingwarm64" then "qcL" else "rc")
++                quoted_archive
+                 (quote_files ~response_files:Config.ar_supports_response_files
+                   file_list))
+ 
+@@ -181,7 +190,13 @@ let remove_Wl cclibs =
+ let call_linker mode output_name files extra =
+   Profile.record_call "c-linker" (fun () ->
+     let cmd =
+-      if mode = Partial then
++      if mode = Partial && Config.system = "mingwarm64" then
++        (* COFF has no relocatable link. A flattened archive is equivalent
++           for packed OCaml units, including when added to another archive. *)
++        Printf.sprintf "llvm-lib /out:%s %s"
++          (Filename.quote output_name)
++          (quote_files ~response_files:true files)
++      else if mode = Partial then
+         let (l_prefix, files) =
+           match Config.ccomp_type with
+           | "msvc" -> ("/libpath:", expand_libname files)

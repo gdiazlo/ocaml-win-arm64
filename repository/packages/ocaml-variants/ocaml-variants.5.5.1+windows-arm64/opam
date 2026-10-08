@@ -1,0 +1,51 @@
+opam-version: "2.0"
+synopsis: "OCaml 5.5.1: native Windows ARM64 (Clang/UCRT, static C stubs)"
+description: """
+Experimental minimal-change Windows ARM64 port of OCaml 5.5.1.
+Includes native ARM64 ocamlopt, bytecode, domains, effects, Unix and threads.
+Uses static linking: FlexDLL, dynamic C-stub loading and native dynlink are
+not supported. Requires the project's MSYS2 CLANGARM64 toolchain in PATH.
+"""
+maintainer: "Windows ARM64 port project"
+authors: ["OCaml contributors" "Windows ARM64 port project"]
+license: "LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception"
+homepage: "https://ocaml.org"
+dev-repo: "git+https://github.com/ocaml/ocaml.git#5.5.1"
+bug-reports: "https://github.com/ocaml/ocaml/issues"
+flags: compiler
+conflict-class: "ocaml-core-compiler"
+available: os = "win32" & arch = "arm64"
+depends: [
+  "ocaml" {= "5.5.1" & post}
+  "base-unix" {post}
+  "base-bigarray" {post}
+  "base-threads" {post}
+  "base-domains" {post}
+  "base-nnp" {post}
+  "base-effects" {post}
+]
+build-env: [
+  [MSYS2_ARG_CONV_EXCL = "*"]
+  [CAML_LD_LIBRARY_PATH = ""]
+]
+build: [
+  ["sh" "configure"
+    "--build=aarch64-w64-mingw32" "--host=aarch64-w64-mingw32"
+    "--prefix=%{prefix}%" "--disable-shared" "--disable-dependency-generation"
+    "--with-relative-libdir" "--with-additional-stublibsdir"
+    "--enable-runtime-search" "--enable-runtime-search-target=fallback"
+    "CC=clang" "AR=llvm-ar" "RANLIB=llvm-ranlib" "LDFLAGS=-static"]
+  [make "-j%{jobs}%"]
+]
+install: [
+  [make "install"]
+  ["ocamlmktop" "-custom" "-I" "+unix" "-I" "+str" "unix.cma" "str.cma"
+    "-o" "%{bin}%/ocaml.exe"]
+]
+url {
+  src: "C:/Users/gdiaz/ocaml/dist/ocaml-5.5.1-windows-arm64-src.tar.gz"
+  checksum: "sha256=f4279945b6ad1c9df354bb066e4ba17b4aacad015e2792b30ba1912de234100c"
+}
+post-messages: [
+  "Native Windows ARM64 OCaml installed. Unix/Str are built into the toplevel. Other C stubs require static linking; native dynlink is unavailable." {!failure}
+]

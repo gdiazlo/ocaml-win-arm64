@@ -1,0 +1,11 @@
+opam-version: "2.0"
+synopsis: "OpenSSL from the project-local CLANGARM64 toolchain"
+maintainer: "Windows ARM64 port project"
+authors: ["OpenSSL contributors"]
+license: "Apache-2.0"
+homepage: "https://www.openssl.org/"
+bug-reports: "https://github.com/openssl/openssl/issues"
+flags: conf
+available: os = "win32" & arch = "arm64"
+depends: ["conf-pkg-config" {= "5" & build}]
+build: [["pkg-config" "--print-errors" "--exists" "openssl"]]

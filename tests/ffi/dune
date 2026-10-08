@@ -1,0 +1,5 @@
+(executable
+ (name ffi_smoke)
+ (modules ffi_smoke)
+ (modes exe byte_complete)
+ (foreign_stubs (language c) (names ffi_stubs)))

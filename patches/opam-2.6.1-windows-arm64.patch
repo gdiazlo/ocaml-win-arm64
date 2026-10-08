@@ -1,0 +1,95 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -217,13 +217,16 @@
+ AS_IF([ test ${WIN32} -eq 1 ],[
+   AS_IF([ test "$GCC" = "yes"], [
+     AS_IF([ test "x${CC64}" = "x" ], [
+-      AS_IF([ test "$ARCH" = "i386" ],
++      AS_IF([ test "$ARCH" = "arm64" ],
++        [T_CC64=clang
++        COMP_ARCH='arm64'],
++      [AS_IF([ test "$ARCH" = "i386" ],
+         [T_CC64=x86_64-w64-mingw32-gcc
+         COMP_ARCH='x86_64'
+         ac_tool_prefix='i686-w64-mingw32-'],
+         [T_CC64=i686-w64-mingw32-gcc
+         COMP_ARCH='i686'
+-        ac_tool_prefix='x86_64-w64-mingw32-'])])
++        ac_tool_prefix='x86_64-w64-mingw32-'])])])
+     AC_CHECK_TOOL(CC64,[${T_CC64}],[no])
+     AS_IF([ test "x${CC64}" != "xno" ],[
+       echo "${CC64} -o " > src/core/cc64
+@@ -352,6 +355,11 @@
+     support_static=yes
+     platform_dependent_stuff="-cclib -lstdc++ -cclib -static-libgcc -cclib -static"
+   ],
++  [aarch64-w64-mingw32*],[
++    support_static=yes
++    default_static=yes
++    platform_dependent_stuff="-cclib -l:libc++.a -cclib -l:libc++abi.a -cclib -l:libunwind.a -cclib -l:libpthread.a -cclib -Wl,-static -cclib -ladvapi32 -cclib -lgdi32 -cclib -luser32 -cclib -lshell32 -cclib -lole32 -cclib -luuid -cclib -luserenv"
++  ],
+   [*-*-mingw32*],[
+     support_static=yes
+     AS_IF([test "x${with_private_runtime}" = "xno"],[default_static=yes])
+--- a/src/core/opamStd.ml
++++ b/src/core/opamStd.ml
+@@ -1407,7 +1407,11 @@
+         in
+         fun _ _ -> Lazy.force warning
+       in
+-      if our_architecture <> their_architecture then
++      if our_architecture = OpamStubs.ARM64 then
++        (* Remote code injection is not validated for this ARM64 port.
++           Use `opam env` to update the parent shell instead. *)
++        no_opam_putenv
++      else if our_architecture <> their_architecture then
+         match their_architecture with
+         | OpamStubs.ARM | ARM64 | IA64 | Unknown ->
+           (* ARM support not yet implemented - just ensure we don't inject Intel
+--- a/src/tools/dune
++++ b/src/tools/dune
+@@ -29,8 +29,26 @@
+   (package     opam-installer)
+   (public_name opam-installer)
+   (modules     opam_installer)
++  (link_flags  (:include installer-link-flags.sexp))
+   (libraries   opam-format opam-core.cmdliner)
+   (flags       (:standard
+                (:include ../ocaml-flags-standard.sexp)
+                (:include ../ocaml-flags-configure.sexp)
+                (:include ../ocaml-context-flags.sexp))))
++
++(rule
++ (enabled_if (and (= %{os_type} "Win32") (= %{architecture} "arm64")))
++ (targets windows-arm64-manifest.o)
++ (deps windows-arm64.rc windows-arm64.manifest)
++ (action (run windres -i windows-arm64.rc -O coff -o %{targets})))
++
++(rule
++ (enabled_if (and (= %{os_type} "Win32") (= %{architecture} "arm64")))
++ (targets installer-link-flags.sexp)
++ (deps windows-arm64-manifest.o)
++ (action (with-stdout-to %{targets} (echo "(-cclib src/tools/windows-arm64-manifest.o)"))))
++
++(rule
++ (enabled_if (or (<> %{os_type} "Win32") (<> %{architecture} "arm64")))
++ (targets installer-link-flags.sexp)
++ (action (with-stdout-to %{targets} (echo "()"))))
+--- /dev/null
++++ b/src/tools/windows-arm64.rc
+@@ -0,0 +1,2 @@
++/* The direct LLVM linker does not add FlexDLL's default asInvoker manifest. */
++1 24 "windows-arm64.manifest"
+--- /dev/null
++++ b/src/tools/windows-arm64.manifest
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
++<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
++  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
++    <security>
++      <requestedPrivileges>
++        <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
++      </requestedPrivileges>
++    </security>
++  </trustInfo>
++</assembly>

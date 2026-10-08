@@ -1,0 +1,22 @@
+opam-version: "2.0"
+synopsis: "Native Windows ARM64 port of opam 2.6.1"
+description: """
+Builds opam 2.6.1 and opam-installer natively using Clang/UCRT and the
+Windows ARM64 OCaml 5.5.1 port. Includes the vendored solver dependencies.
+Direct parent-shell environment injection is disabled: use opam env instead.
+"""
+maintainer: "Windows ARM64 port project"
+authors: ["opam contributors" "Windows ARM64 port project"]
+license: "LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception"
+homepage: "https://opam.ocaml.org"
+dev-repo: "git+https://github.com/ocaml/opam.git#2.6.1"
+bug-reports: "https://github.com/ocaml/opam/issues"
+available: os = "win32" & arch = "arm64"
+depends: ["ocaml-variants" {= "5.5.1+windows-arm64"}]
+conflicts: ["opam" "opam-devel" "opam-client" "opam-installer"]
+build: [["bash" "opam-port-build.sh" "build" prefix jobs]]
+install: [["bash" "opam-port-build.sh" "install"]]
+url {
+  src: "C:/Users/gdiaz/ocaml/dist/opam-2.6.1-windows-arm64-src.tar.gz"
+  checksum: "sha256=2e59fd19cd218902680445b3b1ffe429d4dfa8c13543abb2ee98c209e7f07cde"
+}

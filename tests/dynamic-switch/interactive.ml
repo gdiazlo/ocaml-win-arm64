@@ -1,0 +1,10 @@
+#directory ".";;
+#use "topfind";;
+#thread;;
+#require "sqlite3";;
+#require "ssl";;
+#require "eio_main";;
+#use "tests/libraries/sqlite_smoke.ml";;
+#use "tests/libraries/ssl_smoke.ml";;
+#use "tests/libraries/eio_smoke.ml";;
+print_endline "PASS interactive #require: SQLite, SSL and Eio Windows";;

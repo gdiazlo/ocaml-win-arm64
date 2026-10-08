@@ -1,0 +1,23 @@
+opam-version: "2.0"
+synopsis: "OCaml compiler metadata for the Windows ARM64 5.5.1 port"
+maintainer: "Windows ARM64 port project"
+authors: ["OCaml contributors" "Windows ARM64 port project"]
+license: "LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception"
+homepage: "https://ocaml.org"
+bug-reports: "https://github.com/ocaml/ocaml/issues"
+available: os = "win32" & arch = "arm64"
+depends: [
+  "ocaml-variants" {= "5.5.1+windows-arm64" | = "5.5.1+windows-arm64-dynlink"}
+]
+setenv: [
+  [OCAMLTOP_INCLUDE_PATH += "%{toplevel}%"]
+  [OCAML_TOPLEVEL_PATH = "%{toplevel}%"]
+]
+build: [
+  ["ocaml" "gen_ocaml_config.ml" version name
+    "%{ocaml-variants:version}%" "false"]
+]
+extra-source "gen_ocaml_config.ml" {
+  src: "https://raw.githubusercontent.com/ocaml/ocaml/5799ec070df18cec96e5d828bc8e10b86cb0ed2c/tools/opam/gen_ocaml_config.ml"
+  checksum: "sha256=664da1ec2b19a7cfb55338ee10d9c8634cdca255d6cc46df66cd4d3e7e759969"
+}

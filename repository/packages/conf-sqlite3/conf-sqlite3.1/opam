@@ -1,0 +1,11 @@
+opam-version: "2.0"
+synopsis: "SQLite3 from the project-local CLANGARM64 toolchain"
+maintainer: "Windows ARM64 port project"
+authors: ["SQLite contributors"]
+license: "blessing"
+homepage: "https://www.sqlite.org/"
+bug-reports: "https://github.com/mmottl/sqlite3-ocaml/issues"
+flags: conf
+available: os = "win32" & arch = "arm64"
+depends: ["conf-pkg-config" {= "5" & build}]
+build: [["pkg-config" "--print-errors" "--exists" "sqlite3"]]

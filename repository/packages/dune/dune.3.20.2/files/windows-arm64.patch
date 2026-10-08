@@ -1,0 +1,20 @@
+--- a/boot/libs.ml
++++ b/boot/libs.ml
+@@ -412,7 +412,7 @@
+   ]
+ 
+ let build_flags =
+-  [ ([ "win32"; "win64"; "mingw"; "mingw64" ],
++  [ ([ "win32"; "win64"; "mingw"; "mingw64"; "mingwarm64" ],
+      [ "-ccopt"; "-D_UNICODE"; "-ccopt"; "-DUNICODE" ])
+   ]
+ 
+@@ -423,7 +423,7 @@
+      ; "-cclib"
+      ; "-framework CoreServices"
+      ])
+-  ; ([ "win32"; "win64"; "mingw"; "mingw64" ],
++  ; ([ "win32"; "win64"; "mingw"; "mingw64"; "mingwarm64" ],
+      [ "-cclib"; "-lshell32"; "-cclib"; "-lole32"; "-cclib"; "-luuid" ])
+   ; ([ "beos" ], [ "-cclib"; "-lbsd" ])
+   ]

@@ -1,0 +1,11 @@
+(library
+ (name ffi_support)
+ (wrapped false)
+ (modules)
+ (foreign_stubs (language c) (names ffi_stubs)))
+
+(executable
+ (name ffi_smoke)
+ (modules ffi_smoke)
+ (modes exe byte)
+ (libraries ffi_support))

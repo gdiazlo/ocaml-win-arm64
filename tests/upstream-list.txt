@@ -1,0 +1,9 @@
+tests/basic
+tests/basic-float
+tests/basic-manyargs
+tests/callback
+tests/effects
+tests/lib-domain
+tests/lib-atomic
+tests/lib-bigarray
+tests/backtrace
