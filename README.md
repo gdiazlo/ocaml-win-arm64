@@ -39,7 +39,8 @@ tests. The log is `%USERPROFILE%\.ocaml-dev\setup.log`.
 ## Use OCaml
 
 ```bat
-C:\ocaml-dev\ocaml-shell.cmd     :: from cmd.exe or SSH: interactive CLANGARM64 Bash
+C:\ocaml-dev\ocaml-env.cmd       :: load into the current cmd.exe / SSH session
+C:\ocaml-dev\ocaml-shell.cmd     :: or: interactive CLANGARM64 Bash
 ```
 
 ```sh
@@ -50,7 +51,10 @@ bash scripts/shell.sh            # from Git Bash in C:/ocaml-dev
 . C:\ocaml-dev\scripts\env.ps1   # load into the current PowerShell session
 ```
 
-All three use the calling user's opam root and only affect that shell. Inside,
+All of them use the calling user's own opam root
+(`%USERPROFILE%\.ocaml-dev\opam-root`), keep the current directory, and only
+affect that shell: `ocaml-env.cmd` and a dot-sourced `env.ps1` modify the shell
+you are already in; the Bash launchers open a new one. Inside,
 `opam install <pkg>`, `dune build`, and `ocamlfind` work normally. Prefer the
 Bash shell for building packages. Pass a switch name to use another switch
 (`ocaml-shell.cmd windows-arm64`, `-Switch windows-arm64`). Override the

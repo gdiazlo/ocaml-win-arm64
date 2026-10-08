@@ -29,6 +29,7 @@ if ($LASTEXITCODE -ne 0) {
 Write-Output @"
 
 Done. Open an OCaml environment with:
-  cmd.exe / SSH: C:\ocaml-dev\ocaml-shell.cmd
-  PowerShell:    . C:\ocaml-dev\scripts\env.ps1
+  cmd.exe / SSH: C:\ocaml-dev\ocaml-env.cmd     (in the current shell)
+                 C:\ocaml-dev\ocaml-shell.cmd   (interactive Bash)
+  PowerShell:    . C:\ocaml-dev\scripts\env.ps1  (note the leading dot)
 "@

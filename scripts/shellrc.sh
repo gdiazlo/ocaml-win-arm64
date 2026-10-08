@@ -1,4 +1,4 @@
-# Bash rcfile used by scripts/shell.sh; run inside scripts/msys.sh.
+# Bash rcfile used by scripts/shell.sh; starts inside scripts/msys.sh (project root).
 [[ -f ~/.bashrc ]] && source ~/.bashrc
 OCAML_PROJECT_ROOT=$PWD
 ROOT=$PWD; source "$ROOT/scripts/common.sh"
@@ -10,3 +10,4 @@ eval "$(opam env --shell=bash)"
 PS1="(ocaml $(opam switch show)) \w\$ "
 printf 'OCaml %s, switch %s. opam root: %s\n' \
   "$(ocamlc -version)" "$(opam switch show)" "$OPAMROOT"
+cd "${OCAML_SHELL_CWD:-$HOME}"
