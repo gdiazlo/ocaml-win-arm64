@@ -19,6 +19,28 @@ ARM64/UCRT.
 > two retries, so reliability is still experimental.
 > Neither variant is upstream-supported or production-certified.
 
+## Default environment
+
+The opam root's current switch is **`default`**: the dynamic-linking compiler
+(`ocaml-variants.5.5.1+windows-arm64-dynlink`, with ARM64 FlexDLL) plus Dune,
+ocamlfind, SSL, SQLite3 and Eio. Open an environment with:
+
+```sh
+bash scripts/shell.sh            # interactive CLANGARM64 Bash; use this to build packages
+```
+
+```powershell
+. .\scripts\env.ps1              # load into the current PowerShell session
+```
+
+Both set `OPAMROOT` to this project's `opam-root` and only affect that shell;
+no user profile or global setting is changed. Inside, `opam install <pkg>`,
+`dune build`, and `ocamlfind` work normally. Pass a switch name to either
+script (`bash scripts/shell.sh windows-arm64`, `-Switch windows-arm64`) to use
+another switch.
+
+Fork branches: `windows-arm64` on `gdiazlo/ocaml` and `gdiazlo/flexdll`.
+
 ## Dynamic-linking work and maintained forks
 
 See **[docs/FORKS.md](docs/FORKS.md)** for branch baselines and minimal patch
