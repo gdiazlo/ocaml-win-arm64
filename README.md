@@ -60,6 +60,20 @@ Bash shell for building packages. Pass a switch name to use another switch
 (`ocaml-shell.cmd windows-arm64`, `-Switch windows-arm64`). Override the
 locations with `OCAML_DEV_HOME` or `OPAMROOT_DEV`.
 
+To load OCaml automatically in every new session (including SSH), run once as
+that user (`-Preview` shows the changes, `-Remove` undoes them):
+
+```bat
+powershell -ExecutionPolicy Bypass -File C:\ocaml-dev\persist-env.ps1
+```
+
+It stores `OPAMROOT`, the switch variables and PATH entries (switch, opam,
+Clang toolchain appended last) in the user's environment (`HKCU\Environment`).
+`opam`, `ocaml`, `ocamlfind`, `dune` and native compilation then work in any new
+`cmd`, PowerShell or SSH session. MSYS2's Unix tools are not added globally, so
+build opam packages that run shell scripts from `ocaml-shell.cmd`. Re-run after
+`opam switch set` to follow another switch.
+
 Fork branches: `windows-arm64` on `gdiazlo/ocaml` and `gdiazlo/flexdll`.
 
 ## Dynamic-linking work and maintained forks

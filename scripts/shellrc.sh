@@ -5,6 +5,8 @@ ROOT=$PWD; source "$ROOT/scripts/common.sh"
 export DUNE_CACHE=disabled
 export PATH="$OCAML_PROJECT_ROOT/local/bin:$PATH"
 unset OCAMLLIB CAMLLIB CAML_LD_LIBRARY_PATH OCAMLTOP_INCLUDE_PATH FLEXDIR
+# persist-env.ps1 disables cygpath for plain sessions; MSYS2 provides it here.
+[[ ${FLEXLINKFLAGS:-} == -nocygpath ]] && unset FLEXLINKFLAGS
 if [[ -n ${OCAML_PROJECT_SWITCH:-} ]]; then export OPAMSWITCH=$OCAML_PROJECT_SWITCH; fi
 eval "$(opam env --shell=bash)"
 PS1="(ocaml $(opam switch show)) \w\$ "
