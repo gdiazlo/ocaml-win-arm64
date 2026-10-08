@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
 SWITCH=${1:-windows-arm64}
-PREFIX="opam-root/$SWITCH"
+PREFIX="$OPAMROOT/$SWITCH"
 STAGE=dist/staging/ocaml-5.5.1-arm64-windows
 rm -rf -- "$STAGE"
 mkdir -p "$STAGE/bin" "$STAGE/lib"

@@ -2,9 +2,10 @@
 # Compiler-only relocatable bundle; do not overwrite the static delivery.
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
-SWITCH=${1:-windows-arm64-dynlink}
-PREFIX="opam-root/$SWITCH"
+SWITCH=${1:-default}
+PREFIX="$OPAMROOT/$SWITCH"
 STAGE=dist/staging/ocaml-5.5.1-arm64-windows-dynlink
 rm -rf -- "$STAGE"
 mkdir -p "$STAGE/bin" "$STAGE/lib" "$STAGE/licenses" "$STAGE/docs"

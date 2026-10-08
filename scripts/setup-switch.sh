@@ -2,8 +2,9 @@
 # Run through scripts/msys.sh after scripts/build-local.sh (or use existing local/).
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
-export PATH="$ROOT/local/bin:$PATH" OPAMROOT="$ROOT/opam-root" DUNE_CACHE=disabled
+export PATH="$ROOT/local/bin:$PATH" DUNE_CACHE=disabled
 OPAM="$ROOT/local/bin/opam.exe"
 SWITCH=${1:-windows-arm64}
 if [[ ! -d sources/opam-repository/.git ]]; then

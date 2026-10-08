@@ -2,13 +2,14 @@
 # Source-built dynamic opam switch: normal Dune bytecode and findlib #require.
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
-export OPAMROOT="$ROOT/opam-root" DUNE_CACHE=disabled
+export DUNE_CACHE=disabled
 unset OCAMLLIB CAMLLIB CAML_LD_LIBRARY_PATH OCAMLTOP_INCLUDE_PATH FLEXDIR
-SWITCH=${1:-windows-arm64-dynlink}
+SWITCH=${1:-default}
 OPAM="$ROOT/local/bin/opam.exe"
 run() { "$OPAM" exec --switch="$SWITCH" -- "$@"; }
-PREFIX="$ROOT/opam-root/$SWITCH"
+PREFIX="$OPAMROOT/$SWITCH"
 STAGE=tests/dynamic-switch
 mkdir -p logs "$STAGE/compiler" "$STAGE/pack"
 run ocamlopt.exe -config

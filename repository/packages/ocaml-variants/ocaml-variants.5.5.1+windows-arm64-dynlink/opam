@@ -47,7 +47,7 @@ install: [
   ["bash" "-c" "cp \"$(pkgconf --variable=prefix libzstd)/share/licenses/zstd/LICENSE\" \"%{doc}%/zstd-LICENSE\""]
 ]
 url {
-  src: "C:/Users/gdiaz/ocaml/dist/ocaml-5.5.1-windows-arm64-dynlink-src.tar.gz"
+  src: "C:/ocaml-dev/dist/ocaml-5.5.1-windows-arm64-dynlink-src.tar.gz"
   checksum: "sha256=7f7dbc6577e5d7ff2dd30b011b7261d2406317f67df3f83f2bc0a1dda8405746"
 }
 post-messages: [

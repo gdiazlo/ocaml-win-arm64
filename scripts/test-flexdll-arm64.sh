@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
-export PATH="$ROOT/opam-root/windows-arm64/bin:$PATH"
+export PATH="$OPAMROOT_UNIX/windows-arm64/bin:$PATH"
 make -C sources/flexdll -j1 all CHAINS=mingwarm64 MSVC_DETECT=0 RC=windres
 BUILD="$ROOT/tests/flexdll-arm64"
 mkdir -p "$BUILD"

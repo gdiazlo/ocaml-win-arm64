@@ -3,12 +3,12 @@
 # These are SDK/application runtime dependencies, not the MSYS Unix runtime.
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
-SWITCH=${1:-windows-arm64-dynlink}
-export OPAMROOT="$ROOT/opam-root"
+SWITCH=${1:-default}
 version=$(local/bin/opam.exe var --switch="$SWITCH" ocaml-variants:version)
 [[ $version == 5.5.1+windows-arm64-dynlink ]] || { echo 'Refusing to modify a non-dynamic switch' >&2; exit 1; }
-PREFIX="$ROOT/opam-root/$SWITCH"
+PREFIX="$OPAMROOT/$SWITCH"
 DLLDIR="$ROOT/tools/msys64/clangarm64/bin"
 for dll in libzstd.dll libsqlite3-0.dll libssl-3-arm64.dll libcrypto-3-arm64.dll; do
   info=$(file "$DLLDIR/$dll")

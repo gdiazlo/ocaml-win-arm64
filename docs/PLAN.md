@@ -1,6 +1,6 @@
 # Windows ARM64 port plan
 
-Project root: `C:/Users/gdiaz/ocaml`. All downloaded tools, sources, build
+Project root: `C:/ocaml-dev` (originally `C:/Users/gdiaz/ocaml`). All downloaded tools, sources, build
 products, opam state, patches and tests remain below this directory.
 
 ## Dynamic validation status

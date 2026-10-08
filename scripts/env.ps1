@@ -1,10 +1,11 @@
 # Load the project's opam root and switch into the current PowerShell session.
-# Usage: . .\scripts\env.ps1 [-Switch <name>]   (default: the opam-root current switch)
+# Usage: . .\scripts\env.ps1 [-Switch <name>]   (default: the opam root's current switch)
 # Prefer scripts/shell.sh for building packages: opam builds expect MSYS2 tools.
 param([string]$Switch = '')
 $Root = Split-Path $PSScriptRoot -Parent
 $Msys = Join-Path $Root 'tools\msys64'
-$env:OPAMROOT = Join-Path $Root 'opam-root'
+if (-not $env:OCAML_DEV_HOME) { $env:OCAML_DEV_HOME = Join-Path $env:USERPROFILE '.ocaml-dev' }
+$env:OPAMROOT = if ($env:OPAMROOT_DEV) { $env:OPAMROOT_DEV } else { Join-Path $env:OCAML_DEV_HOME 'opam-root' }
 $env:DUNE_CACHE = 'disabled'
 $env:MSYSTEM = 'CLANGARM64'
 $env:COMSPEC = "$env:SystemRoot\System32\cmd.exe"

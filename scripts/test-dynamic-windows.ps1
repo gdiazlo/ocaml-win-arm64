@@ -1,8 +1,9 @@
 # Run the fresh switch's programs with no MSYS/toolchain directories in PATH.
-param([string]$Switch = 'windows-arm64-dynlink')
+param([string]$Switch = 'default')
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path $PSScriptRoot -Parent
-$Prefix = Join-Path $Root "opam-root/$Switch"
+$OpamRoot = if ($env:OPAMROOT_DEV) { $env:OPAMROOT_DEV } else { Join-Path $env:USERPROFILE '.ocaml-dev\opam-root' }
+$Prefix = Join-Path $OpamRoot $Switch
 $SavedPath = $env:PATH
 $SavedStubs = $env:CAML_LD_LIBRARY_PATH
 $SavedLib = $env:OCAMLLIB

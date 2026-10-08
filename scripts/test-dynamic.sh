@@ -2,6 +2,7 @@
 # Ordinary bytecode (no -custom), native programs, and a native DLL plugin.
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
 export PATH="$ROOT/local-dynamic/bin:$ROOT/local-dynamic/flexdll:$PATH"
 unset OCAMLLIB CAMLLIB CAML_LD_LIBRARY_PATH OCAMLTOP_INCLUDE_PATH
@@ -55,14 +56,14 @@ ocaml.exe tests/dynamic/unicode_smoke.ml
 # the OCaml wrapper is rebuilt. SSL's OCaml and C sources are rebuilt unmodified.
 mkdir -p tests/dynamic/libraries
 chmod -R u+w tests/dynamic/libraries
-cp opam-root/windows-arm64/lib/sqlite3/sqlite3.{ml,mli} tests/dynamic/libraries/
+cp "$OPAMROOT"/windows-arm64/lib/sqlite3/sqlite3.{ml,mli} tests/dynamic/libraries/
 cp sources/ssl/src/ssl.{ml,mli} sources/ssl/src/ssl_stubs.c tests/dynamic/libraries/
 cp tests/libraries/{sqlite,ssl}_smoke.ml tests/dynamic/libraries/
 (
   cd tests/dynamic/libraries
   # Old manual output names must not shadow the system -lsqlite3/-lssl.
   rm -f libsqlite3.a libssl.a dllsqlite3.dll dllssl.dll
-  llvm-ar x ../../../opam-root/windows-arm64/lib/sqlite3/libsqlite3_stubs.a
+  llvm-ar x "$OPAMROOT"/windows-arm64/lib/sqlite3/libsqlite3_stubs.a
   ocamlc.exe -c sqlite3.mli
   ocamlc.exe -c sqlite3.ml
   ocamlmklib.exe -o sqlite3 -oc sqlite3_stubs sqlite3.cmo sqlite3_stubs.o -lsqlite3

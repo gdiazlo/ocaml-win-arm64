@@ -2,6 +2,7 @@
 # Unmodified upstream tests in the separate dynamic compiler build tree.
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
 BUILD=sources/ocaml-windows-arm64-dynamic
 [[ -f "$BUILD/Makefile.config" ]] || { echo 'Run build-dynamic.sh first' >&2; exit 1; }
@@ -11,7 +12,7 @@ git -C sources/ocaml diff --quiet HEAD -- testsuite/tests
 cp -a sources/ocaml/testsuite/tests "$BUILD/testsuite/"
 # The standalone FlexDLL directory also contains flexdll.h and support objects
 # needed by configure's external-FlexDLL probe (the compiler package vendors it).
-export PATH="$ROOT/local-dynamic/flexdll:$ROOT/opam-root/windows-arm64-dynlink/bin:$PATH"
+export PATH="$ROOT/local-dynamic/flexdll:$OPAMROOT_UNIX/windows-arm64-dynlink/bin:$PATH"
 unset OCAMLLIB CAMLLIB CAML_LD_LIBRARY_PATH OCAMLTOP_INCLUDE_PATH FLEXDIR
 cd "$BUILD"
 ./configure --build=aarch64-w64-mingw32 --host=aarch64-w64-mingw32 \

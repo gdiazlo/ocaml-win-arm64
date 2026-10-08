@@ -2,8 +2,9 @@
 # Research probes only; does not patch FlexDLL or the working OCaml installation.
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
-export PATH="$ROOT/opam-root/windows-arm64/bin:$ROOT/local/bin:$PATH"
+export PATH="$OPAMROOT_UNIX/windows-arm64/bin:$ROOT/local/bin:$PATH"
 PROBE=tests/flexdll-arm64-probe
 (
   cd "$PROBE"

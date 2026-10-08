@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Isolated source build of the dynamic variant. Does not touch local/ or opam-root/.
+# Isolated source build of the dynamic variant. Does not touch local/ or the opam root.
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
-export PATH="$ROOT/local-dynamic/flexdll:$ROOT/opam-root/windows-arm64/bin:$PATH"
+export PATH="$ROOT/local-dynamic/flexdll:$OPAMROOT_UNIX/windows-arm64/bin:$PATH"
 unset OCAMLLIB CAMLLIB CAML_LD_LIBRARY_PATH OCAMLTOP_INCLUDE_PATH FLEXDIR
 make -C sources/flexdll -j1 all CHAINS=mingwarm64 MSVC_DETECT=0 RC=windres
 mkdir -p local-dynamic/flexdll

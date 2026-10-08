@@ -2,8 +2,9 @@
 # Run through scripts/msys.sh. Fails immediately on a build/test failure.
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+source "$ROOT/scripts/common.sh"
 cd "$ROOT"
-export PATH="$ROOT/local/bin:$PATH" OPAMROOT="$ROOT/opam-root" DUNE_CACHE=disabled
+export PATH="$ROOT/local/bin:$PATH" DUNE_CACHE=disabled
 OPAM="$ROOT/local/bin/opam.exe"
 SWITCH=${1:-windows-arm64}
 run() { "$OPAM" exec --switch="$SWITCH" -- "$@"; }
